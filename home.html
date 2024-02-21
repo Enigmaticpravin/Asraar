@@ -121,10 +121,9 @@ if (messageInput) {
         // Save the message to Firebase Realtime Database
         const database = getDatabase(app);
         const messagesRef = ref(database, 'messages');
-
         push(messagesRef, {
             message: message,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         });
 
         // You can also perform other actions with the message here
@@ -144,6 +143,7 @@ if (messageInput) {
     }
 }
         }
+
         const header = document.querySelector("header");
         const hamburgerBtn = document.querySelector("#hamburger-btn");
         const closeMenuBtn = document.querySelector("#close-menu-btn");
