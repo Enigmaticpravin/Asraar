@@ -4,83 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Glassmorphism Google Login</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background: linear-gradient(to right, #74ebd5, #acb6e5);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .glass-container {
-            width: 300px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            text-align: center;
-            position: relative;
-        }
-
-        .glass-container h1 {
-            color: #fff;
-            margin-bottom: 30px;
-        }
-
-        .google-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: #fff;
-            color: #4a69bb;
-            border: none;
-            border-radius: 8px;
-            padding: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s ease;
-        }
-
-        .google-btn img {
-            margin-right: 10px;
-            width: 20px;
-            height: 20px;
-        }
-
-        .google-btn:hover {
-            background: #f2f2f2;
-        }
-
-        .creative-text {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 12px;
-            color: #fff;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <header>
+        <nav class="navbar">
+          <a class="logo" href="home.html">asraar<span>.</span></a>
+          <ul class="menu-links">
+            <span id="close-menu-btn" class="material-symbols-outlined">close</span>
+            <li><a href="home.html">Home</a></li>
+            <li><a href="about_us.html">About us</a></li>
+            <li><a href="messages.html" style="display: none;">Messages</a></li>
+            <a href="#" class="login-button">Login</a>
+          </ul>
+          <span id="hamburger-btn" class="material-symbols-outlined">menu</span>
+        </nav>
+      </header>
     <div class="glass-container">
-        <h1>Glassmorphism Google Login</h1>
-        <button class="google-btn" onclick="signInWithGoogle()">
-            <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google Icon">
-            Continue with Google
-        </button>
-        <p class="creative-text">Creative text goes here...</p>
+        <img src="images/Hidden-cuate.svg">
+        <div class="did">
+            <h1>did you know?</h1>
+            <h4>When people can stay anonymous, they feel more comfortable sharing their problems. It helps create real connections and support!</h4>
+            <button class="google-btn" onclick="signInWithGoogle()">
+                <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google Icon">
+                Get Started
+            </button>
+        </div>
+        <p class="creative-text">Your privacy is our priority.</p>
     </div>
     <script type="module">
         // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
-        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.0.2/firebase-analytics.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.0.2/firebase-database.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.0.2/firebase-auth.js";
         // TODO: Add SDKs for Firebase products that you want to use
         // https://firebase.google.com/docs/web/setup#available-libraries
       
@@ -96,23 +53,52 @@
       
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const auth = getAuth(app);
+    const analytics = getAnalytics(app);
 
-        window.signInWithGoogle = async function () {
-            const provider = new GoogleAuthProvider();
+    const provider = new GoogleAuthProvider();
 
-            auth.signInWithPopup(provider)
-                .then((result) => {
-                    // Handle successful authentication
-                    const user = result.user;
-                    console.log(user);
-                })
-                .catch((error) => {
-                    // Handle errors
-                    console.error(error);
-                });
-        }
+    window.signInWithGoogle = async function () {
+        const auth = getAuth();
+signInWithPopup(auth, provider)
+  .then((result) => {
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    const token = credential.accessToken;
+    // The signed-in user info.
+    const user = result.user;
+    saveUserInfoToDatabase(user);
+  }).catch((error) => {
+    // Handle Errors here.
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    // The email of the user's account used.
+    const email = error.customData.email;
+    // The AuthCredential type that was used.
+    const credential = GoogleAuthProvider.credentialFromError(error);
+    // ...
+  });
+    }
+
+    function saveUserInfoToDatabase(user) {
+
+    const database = getDatabase(app);
+    const userRef = ref(database, 'Users/' + user.uid);
+
+    // Create an object with user information
+    const userData = {
+        name: user.displayName,
+        email: user.email,
+        profilePic: user.photoURL,
+    };
+
+    // Save user information to the database
+    set(userRef, userData)
+        .then(() => {
+            console.log('User information saved to the database.');
+        })
+        .catch((error) => {
+            console.error('Error saving user information:', error);
+        });
+}
 
       </script>
 </body>
